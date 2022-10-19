@@ -1,42 +1,40 @@
 import { transformSync } from '@babel/core'
-import { Module } from 'module'
-import path from 'path'
-import vm from 'vm'
 
-export function transform(code: string, filename: string) {
+export function transform(
+  code: string,
+  filename: string,
+  options: {
+    /** @default "esm" */
+    format?: 'esm' | 'cjs'
+    /** @default true */
+    sourcemap?: boolean
+  } = {}
+) {
+  const plugins = [
+    'react-dev-ssr/jsx-transform',
+    [
+      '@babel/transform-react-jsx',
+      {
+        runtime: 'automatic',
+        importSource: 'react-dev-ssr',
+      },
+    ],
+  ]
+
+  if (options.format == 'cjs') {
+    plugins.push('@babel/transform-modules-commonjs')
+  }
+
   const result = transformSync(code, {
     babelrc: false,
     filename,
-    sourceMaps: 'inline',
-    plugins: [
-      path.resolve(__dirname, '../dist/babel/plugin.js'),
-      [
-        '@babel/transform-react-jsx',
-        {
-          runtime: 'automatic',
-          importSource: path.resolve(__dirname, '../src/jsx'),
-        },
-      ],
-      '@babel/transform-modules-commonjs',
-    ],
+    sourceMaps: options.sourcemap !== false && 'inline',
+    plugins,
   })
 
   if (!result) {
     throw Error('transform failed')
   }
 
-  return {
-    ...result,
-    run() {
-      const context = vm.createContext({
-        require: Module.createRequire(filename),
-        module: { exports: {} },
-        exports: {},
-      })
-
-      vm.runInContext(result.code!, context)
-
-      return context.module.exports
-    },
-  }
+  return result
 }

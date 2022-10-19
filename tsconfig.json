@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
+    "checkJs": true,
+    "jsx": "react-jsx",
     "module": "commonjs",
     "moduleResolution": "node16",
-    "strict": true
+    "strict": true,
+    "target": "es2019"
   }
 }

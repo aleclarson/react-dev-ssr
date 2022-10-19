@@ -1,26 +1,19 @@
-import { RenderedElement } from './render'
-import { kChildElement } from './symbols'
+import { renderer } from './global'
+import { mark } from './mark'
+import { render } from './render'
+import { kElementType, kFragmentType, kJsxPropType } from './symbols'
+import { Element, HtmlString } from './types'
 
-export type Element = {
-  type: string | Function
-  props: ElementProps
-}
+export {
+  markCallSite as jsxCallSite,
+  render as renderJSX,
+  renderIfElement as renderIfJSX,
+} from './render'
 
-export type ElementProps = Record<string, any> & { children?: Children }
-
-export type Children =
-  | Children[]
-  | ChildElement
-  | RenderedElement
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-
-export type ChildElement = (() => Element) & {
-  [kChildElement]: true
-}
+export const jsxProp = (get: any) => ({
+  [kJsxPropType]: true,
+  get,
+})
 
 export function jsx(
   type: string | Function,
@@ -29,6 +22,14 @@ export function jsx(
   isStaticChildren: boolean,
   source: string,
   self: any
-) {
-  return { type, props }
+): Element | HtmlString {
+  const element = mark({ type, props }, kElementType)
+  return renderer.immediateMode ? render(element) : element
+}
+
+// We don't treat static elements differently.
+export const jsxs = jsx
+
+export function Fragment(props: any): Element {
+  return mark({ type: kFragmentType, props }, kElementType)
 }

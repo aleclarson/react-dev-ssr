@@ -1,5 +1,6 @@
 import { Context } from './context'
-import { getContext } from './global'
+import { renderer } from './global'
+import { kContextInit } from './symbols'
 
 const noop = () => {}
 
@@ -17,7 +18,13 @@ export function useMemo(get: any) {
 }
 
 export function useContext(context: Context) {
-  return getContext(context)
+  for (let i = renderer.componentStack.length - 1; i >= 0; i--) {
+    const entry = renderer.contextStack[i]
+    if (entry && entry[0] == context) {
+      return entry[1]
+    }
+  }
+  return context[kContextInit]
 }
 
 export const useEffect = noop

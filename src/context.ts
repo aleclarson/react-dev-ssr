@@ -1,4 +1,6 @@
-import { getContext, setContext } from './global'
+import { renderer } from './global'
+import { useContext } from './hooks'
+import { Fragment } from './jsx'
 import { render } from './render'
 import { kContextId, kContextInit } from './symbols'
 
@@ -12,17 +14,21 @@ export interface Context {
 let nextId = 1
 
 export function createContext(init?: any) {
-  const context = {
+  const context: Context = {
     [kContextId]: nextId++,
     [kContextInit]: init,
     Provider,
     Consumer,
   }
   function Provider(props: { value: any; children: any }) {
-    setContext(context, props.value)
-    return render(props.children)
+    renderer.contextStack[renderer.contextStack.length - 1] = [
+      context,
+      props.value,
+    ]
+    return render(Fragment(props))
   }
   function Consumer(props: { children: (value: any) => any }) {
-    return render(props.children(getContext(context)))
+    return props.children(useContext(context))
   }
+  return context
 }

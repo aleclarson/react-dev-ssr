@@ -3,9 +3,17 @@
   "version": "0.1.0",
   "exports": {
     ".": {
-      "types": "./dist/render.d.ts",
-      "import": "./dist/render.mjs",
-      "default": "./dist/render.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    },
+    "./jsx-runtime": {
+      "import": "./dist/jsx.mjs",
+      "default": "./dist/jsx.js"
+    },
+    "./jsx-transform": {
+      "import": "./dist/babel/plugin.mjs",
+      "default": "./dist/babel/plugin.js"
     }
   },
   "prettier": "@alloc/prettier-config",
@@ -17,15 +25,18 @@
     "@babel/types": "^7.19.4",
     "@types/babel__core": "^7.1.19",
     "@types/node": "^18.11.2",
+    "@types/react": "^18.0.21",
     "prettier": "^2.7.1",
+    "react": "^18.2.0",
     "react-dev-ssr": "link:./",
+    "sucrase": "^3.28.0",
     "tsup": "^6.3.0",
     "typescript": "^4.8.4",
     "vitest": "^0.24.3"
   },
   "scripts": {
     "test": "vitest",
-    "dev": "tsup-node --sourcemap --watch",
+    "dev": "tsup-node --sourcemap --watch --clean",
     "build": "tsup-node --dts"
   }
 }
