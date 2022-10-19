@@ -1,6 +1,7 @@
 {
   "name": "react-dev-ssr",
   "version": "0.1.0",
+  "license": "See LICENSE.md",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
