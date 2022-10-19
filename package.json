@@ -1,0 +1,31 @@
+{
+  "name": "react-dev-ssr",
+  "version": "0.1.0",
+  "exports": {
+    ".": {
+      "types": "./dist/render.d.ts",
+      "import": "./dist/render.mjs",
+      "default": "./dist/render.js"
+    }
+  },
+  "prettier": "@alloc/prettier-config",
+  "devDependencies": {
+    "@alloc/prettier-config": "^1.0.0",
+    "@babel/core": "^7.19.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.18.6",
+    "@babel/plugin-transform-react-jsx": "^7.19.0",
+    "@babel/types": "^7.19.4",
+    "@types/babel__core": "^7.1.19",
+    "@types/node": "^18.11.2",
+    "prettier": "^2.7.1",
+    "react-dev-ssr": "link:./",
+    "tsup": "^6.3.0",
+    "typescript": "^4.8.4",
+    "vitest": "^0.24.3"
+  },
+  "scripts": {
+    "test": "vitest",
+    "dev": "tsup-node --sourcemap --watch",
+    "build": "tsup-node --dts"
+  }
+}
