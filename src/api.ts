@@ -1,2 +1,2 @@
-export const memo = component => component
-export const forwardRef = component => component
+export const memo = (component: any) => component
+export const forwardRef = (component: any) => component
