@@ -35,9 +35,10 @@ In your Vite config, add the following code:
 
 ```ts
 import reactDevSSR from 'react-dev-ssr/vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [reactDevSSR()],
+  plugins: [react(), reactDevSSR()],
 })
 ```
 
