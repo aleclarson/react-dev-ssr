@@ -12,7 +12,7 @@ Since the `react-dev-ssr` runtime only runs on the server, it doesn't need to im
 
 ## Help wanted
 
-This is a work-in-progress. Many React features are missing that you might be using. If you find a missing feature, please open an issue or PR.
+This is a work-in-progress. Many React features are missing that you might be using. If you find a missing feature, please open an issue or PR. **If your React app is relatively basic, this package should work just fine!**
 
 - Suspense
 - Class components
