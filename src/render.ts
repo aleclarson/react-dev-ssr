@@ -10,10 +10,10 @@ import {
 import { Element, HtmlString, JSXCallSite } from './types'
 
 export function renderToString(element: Element | JSXCallSite) {
-  if (isCallSite(element)) {
-    return renderCallSite(element).html
-  }
-  return renderElement(element).html
+  const result = isCallSite(element)
+    ? renderCallSite(element)
+    : renderElement(element)
+  return result.html
 }
 
 /** @internal */
@@ -50,8 +50,7 @@ export function renderElement(element: Element | null): HtmlString {
     }
   }
   if (type == kFragmentType) {
-    const childrenHtml = toArray(props.children).map(renderChild)
-    return markHtml(childrenHtml.join(''))
+    return renderFragment(props)
   }
   console.log('render html: %O', type)
   let tag = `<${type}`
@@ -62,10 +61,10 @@ export function renderElement(element: Element | null): HtmlString {
     if (key == kDangerouslySetInnerHTML) {
       continue
     }
+    const value = props[key]
     if (key == 'className') {
       key = 'class'
     }
-    const value = props[key]
     if (value === true) {
       tag += ` ${key}`
     } else if (isHtmlValue(value)) {
@@ -83,22 +82,38 @@ export function renderElement(element: Element | null): HtmlString {
     if (children.length === 0) {
       return markHtml(`${tag} />`)
     }
-    tag += `>`
-    for (const child of children) {
-      const childHtml = renderChild(child)
-      tag += childHtml
-    }
+    tag += `>` + renderChildren(children)
   }
   return markHtml(`${tag}</${type}>`)
 }
 
 /** @internal */
-export function renderChild(child: any): string | HtmlString {
+export function renderFragment(props: any) {
+  return markHtml(renderChildren(toArray(props.children)))
+}
+
+function renderChildren(children: any[]) {
+  let html = ''
+  children.forEach((child, i) => {
+    const childHtml = renderChild(child).html
+    if (childHtml) {
+      if (i > 0 && typeof children[i - 1] == 'string' && childHtml[0] !== '<') {
+        html += '<!-- -->'
+      }
+      html += childHtml
+    }
+  })
+  return html
+}
+
+/** @internal */
+export function renderChild(child: any): HtmlString {
   if (child) {
     if (child[kJsxPropType]) {
+      const { immediateMode } = renderer
       renderer.immediateMode = false
       child = child.get()
-      renderer.immediateMode = true
+      renderer.immediateMode = immediateMode
       return renderChild(child)
     }
     if (child[kElementType]) {
@@ -108,17 +123,16 @@ export function renderChild(child: any): string | HtmlString {
       return renderCallSite(child)
     }
     if (child[kHtmlType]) {
-      return child.html
+      return child
     }
     if (Array.isArray(child)) {
-      const childrenHtml = child.map(renderChild)
-      return markHtml(childrenHtml.join(''))
+      return markHtml(renderChildren(child))
     }
   }
   if (child === null || child === false) {
-    return ''
+    return markHtml('')
   }
-  return escapeHtml(child)
+  return markHtml(escapeHtml(child))
 }
 
 /** @internal */
@@ -140,7 +154,12 @@ function renderCallSite(render: JSXCallSite): HtmlString {
   }
 }
 
-const markHtml = (html: string): HtmlString => mark({ html }, kHtmlType) as any
+const markHtml = (html: string): HtmlString =>
+  mark({ html, toString: unwrapHtml }, kHtmlType) as any
+
+function unwrapHtml(this: HtmlString) {
+  return this.html
+}
 
 const kDangerouslySetInnerHTML = 'dangerouslySetInnerHTML'
 

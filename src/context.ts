@@ -1,7 +1,6 @@
 import { renderer } from './global'
 import { useContext } from './hooks'
-import { Fragment } from './jsx'
-import { renderElement } from './render'
+import { renderFragment } from './render'
 import { kContextId, kContextInit } from './symbols'
 
 export interface Context {
@@ -25,7 +24,7 @@ export function createContext(init?: any) {
       context,
       props.value,
     ]
-    return renderElement(Fragment(props))
+    return renderFragment(props)
   }
   function Consumer(props: { children: (value: any) => any }) {
     return props.children(useContext(context))
