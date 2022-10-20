@@ -70,3 +70,5 @@ You also need to swap out `react` and `react-dom/server` imports with `react-dev
 
 - **Babel**  
   If you're not using a bundler, you can try using the [`babel-plugin-import-replacement`](https://github.com/BuggMaker/babel-plugin-import-replacement) plugin.
+
+Depending on which tool you're using, it might be difficult for you to apply `react-dev-ssr` aliases **in development SSR only**. If you figure it out, please open a PR to add it to this README.
