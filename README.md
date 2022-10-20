@@ -42,6 +42,10 @@ export default defineConfig({
 })
 ```
 
+> **Warning**
+> Vite support is pending a PR to Vite:
+> https://github.com/vitejs/vite/pull/10552
+
 ### Using with Babel
 
 In your Babel config, add the following to your plugins array:
