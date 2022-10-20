@@ -2,6 +2,14 @@
 
 A custom JSX runtime + Babel transform that runs your React SSR code in a way that makes the stack trace actually useful. You can see every ancestor component and where the current component exists in its immediate parent.
 
+## How it works
+
+Every JSX element using a custom component is wrapped with the `jsxCallSite` function from `react-dev-ssr/jsx-runtime` module. This wraps the element with a closure, creating a stack frame where the element was declared. Since the `react-dev-ssr` runtime is synchronous, you will which JSX elements led to the invocation of the current stack of components being rendered.
+
+Every JSX child expression is also wrapped with `jsxCallSite`, so you can see where exactly each component was declared inside its parent component.
+
+Since the `react-dev-ssr` runtime only runs on the server, it doesn't need to implement any concept of re-rendering. This allows for a drastically simplified runtime. Many of React's features are no-ops on the server (eg: `useEffect`, `React.memo`, etc).
+
 ## Usage
 
 ```
