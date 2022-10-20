@@ -1,1 +1,1 @@
-export * from '../src/vite/plugin'
+export * from '../../src/vite/plugin'
