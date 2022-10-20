@@ -10,6 +10,19 @@ Every JSX child expression is also wrapped with `jsxCallSite`, so you can see wh
 
 Since the `react-dev-ssr` runtime only runs on the server, it doesn't need to implement any concept of re-rendering. This allows for a drastically simplified runtime. Many of React's features are no-ops on the server (eg: `useEffect`, `React.memo`, etc).
 
+## Help wanted
+
+This is a work-in-progress. Many React features are missing that you might be using. If you find a missing feature, please open an issue or PR.
+
+- Suspense
+- Class components
+- `cloneElement`
+- `isValidElement`
+- `React.Children`
+- `React.lazy`
+- `useReducer`
+- `useId`
+
 ## Usage
 
 ```
