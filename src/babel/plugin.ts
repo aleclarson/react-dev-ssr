@@ -40,9 +40,9 @@ export default function (): babel.PluginObj<State> {
                       return
                     }
                     if (jsxElements.some(elem => elem.isDescendant(path))) {
-                      state.imports.add('_renderJSX')
+                      state.imports.add('_renderElement')
                       const wrapper = t.callExpression(
-                        t.identifier('_renderJSX'),
+                        t.identifier('_renderElement'),
                         [returned.node]
                       )
                       copyLocation(wrapper, returned)
@@ -163,8 +163,8 @@ export default function (): babel.PluginObj<State> {
             if (!returned.node) {
               return
             }
-            state.imports.add('_renderIfJSX')
-            const wrapper = t.callExpression(t.identifier('_renderIfJSX'), [
+            state.imports.add('_render')
+            const wrapper = t.callExpression(t.identifier('_render'), [
               returned.node,
             ])
             copyLocation(wrapper, returned)

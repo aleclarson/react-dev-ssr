@@ -1,13 +1,13 @@
 import { renderer } from './global'
 import { mark } from './mark'
-import { render } from './render'
+import { renderElement } from './render'
 import { kElementType, kFragmentType, kJsxPropType } from './symbols'
 import { Element, HtmlString } from './types'
 
 export {
   markCallSite as jsxCallSite,
-  render as renderJSX,
-  renderIfElement as renderIfJSX,
+  renderChild as render,
+  renderElement,
 } from './render'
 
 export const jsxProp = (get: any) => ({
@@ -24,7 +24,7 @@ export function jsx(
   self: any
 ): Element | HtmlString {
   const element = mark({ type, props }, kElementType)
-  return renderer.immediateMode ? render(element) : element
+  return renderer.immediateMode ? renderElement(element) : element
 }
 
 // We don't treat static elements differently.

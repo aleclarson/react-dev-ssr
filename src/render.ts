@@ -13,23 +13,22 @@ export function renderToString(element: Element | JSXCallSite) {
   if (isCallSite(element)) {
     return renderCallSite(element).html
   }
-  return render(element).html
+  return renderElement(element).html
 }
 
-export function render(element: Element | HtmlString | null): HtmlString {
+/** @internal */
+export function renderElement(element: Element | null): HtmlString {
   if (element === null) {
     return markHtml('')
   }
-  if (isHtmlString(element)) {
-    // If immediate mode is on, calling render on the returned value may
-    // give us a rendered element.
-    return element
-  }
   const { type, props } = element
   if (typeof type == 'function') {
+    const { immediateMode } = renderer
+    renderer.immediateMode = false
     renderer.componentStack.push(type)
     renderer.contextStack.push(null)
     try {
+      console.log('render component:', type.name)
       const result = type(props)
       if (result === null) {
         return markHtml('')
@@ -38,11 +37,14 @@ export function render(element: Element | HtmlString | null): HtmlString {
         return result
       }
       if (result[kElementType]) {
-        // TODO: this shouldn't happen, but it does
-        return render(result)
+        // An element may be returned if the Babel transform cannot
+        // determine if a return expression should be wrapped with a
+        // `renderElement` call.
+        return renderElement(result)
       }
       throw Error('Component returned an invalid value')
     } finally {
+      renderer.immediateMode = immediateMode
       renderer.componentStack.pop()
       renderer.contextStack.pop()
     }
@@ -51,6 +53,7 @@ export function render(element: Element | HtmlString | null): HtmlString {
     const childrenHtml = toArray(props.children).map(renderChild)
     return markHtml(childrenHtml.join(''))
   }
+  console.log('render html: %O', type)
   let tag = `<${type}`
   for (let key in props) {
     if (key == 'children' || key == 'key' || key == 'ref') {
@@ -89,23 +92,36 @@ export function render(element: Element | HtmlString | null): HtmlString {
   return markHtml(`${tag}</${type}>`)
 }
 
-export function renderIfElement(value: any) {
-  if (value) {
-    if (value[kElementType]) {
-      return render(value)
-    }
-    if (isCallSite(value)) {
-      return renderCallSite(value)
-    }
-    if (value[kJsxPropType]) {
+/** @internal */
+export function renderChild(child: any): string | HtmlString {
+  if (child) {
+    if (child[kJsxPropType]) {
       renderer.immediateMode = false
-      value = value.get()
+      child = child.get()
       renderer.immediateMode = true
+      return renderChild(child)
+    }
+    if (child[kElementType]) {
+      return renderElement(child)
+    }
+    if (isCallSite(child)) {
+      return renderCallSite(child)
+    }
+    if (child[kHtmlType]) {
+      return child.html
+    }
+    if (Array.isArray(child)) {
+      const childrenHtml = child.map(renderChild)
+      return markHtml(childrenHtml.join(''))
     }
   }
-  return value
+  if (child === null || child === false) {
+    return ''
+  }
+  return escapeHtml(child)
 }
 
+/** @internal */
 export function markCallSite(renderFn: Function): JSXCallSite {
   return mark(renderFn, kCallSiteType) as any
 }
@@ -122,17 +138,6 @@ function renderCallSite(render: JSXCallSite): HtmlString {
   } finally {
     renderer.immediateMode = false
   }
-}
-
-function renderChild(child: any): string | HtmlString {
-  child = renderIfElement(child)
-  if (child && child[kHtmlType]) {
-    return child.html
-  }
-  if (child === null || child === false) {
-    return ''
-  }
-  return escapeHtml(child)
 }
 
 const markHtml = (html: string): HtmlString => mark({ html }, kHtmlType) as any
